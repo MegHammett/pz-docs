@@ -1,6 +1,6 @@
 # Introduction
 
-Welcome to the Piazza User Guide. It contains descriptions of Piazza's main features and many pieces of example code showing how to use those features. This document is aimed at Piazza _users_: developers looking to build services and applications that use Piazza. (In contrast, the link:../devguide/index.html[Developers Guide] is aimed at Piazza _developers_: those wishing to work on the Piazza codebase itself.)
+Welcome to the Piazza User Guide. It contains descriptions of Piazza's main features and many pieces of example code showing how to use those features. This document is aimed at Piazza _users - developers looking to build services and applications that use Piazza. (In contrast, the link:../devguide/index.html[Developer’s Guide] is aimed at Piazza _developers - those wishing to work on the Piazza codebase itself.
 
 
 ## Piazza In Brief
@@ -17,24 +17,24 @@ Execute external services:: Users will wish to execute external web services, su
 
 Detect events and trigger actions:: Piazza allows users to define _event types_, such as the loading of a new file within a certain bounding box or the successful completion of an external service; _events_ of those types can then be generated from within the system or sent to the system from the outside. Users then create _triggers_ -- actions to be taken when certain event conditions are met -- thus allowing Piazza to be responsible for executing simple "workflows" of activities.
 
-Piazza is not unique in its ability to offer these services. Developers could, for example, use a message queuing system to implement their own eventing and triggering system, or could stand up their own WPS server for invoking external services. It is our position, however, that in many cases developers shouldn't have to. For many common needs within the target environment, Piazza can provide a simple alternative.
+Piazza is not unique in its ability to offer these services. Developers could, for example, use a message queuing system to implement their own event and trigger system or stand up their own WPS server for invoking external services. It is our position, however, that in many cases developers shouldn't have to do either of these. For many common needs within the target environment, Piazza can provide a simple alternative.
 
 
 ## A User's View of Piazza
 
-From the outside, Piazza is web service that exposes several REST endpoints for performing operations like loading data and invoking user services.
+From the outside, Piazza is a web service that exposes several REST endpoints for performing such operations as loading data and invoking user services.
 
-Following the REST model, Piazza supports the usual HTTP verbs (`POST`, `GET`, `DELETE`, etc.) and models objects within the system as _resources_ with unique ids (UUIDs). For example, to load a file into Piazza, one might `POST` to `/data` a JSON object which describes an image in an S3 bucket. If the operation is successful, an _id_ such as `b72b270a-168f-466a-a7eb-952a3da7fc8b` will be returned. The user can then issue a `GET` request to `/data/b72b270a-168f-466a-a7eb-952a3da7fcb8` and get back a JSON object containing information about that data resource.
+Following the REST model, Piazza supports the usual HTTP verbs (`POST`, `GET`, `DELETE`, etc.) and models objects within the system as _resources_ with unique ids (UUIDs). For example, to load a file into Piazza, one might `POST` to `/data` a JSON object that describes an image in an S3 bucket. If the operation is successful, an _id_ such as `b72b270a-168f-466a-a7eb-952a3da7fc8b` will be returned. The user can then issue a `GET` request to `/data/b72b270a-168f-466a-a7eb-952a3da7fcb8` and get back a JSON object containing information about that data resource.
 
-Requests sent to Piazza can be either _short_ or _long_. Short requests, like most `GET` and `DELETE` operations, return their results immediately. Long operations, however, like a `POST` to load a file, execute as _jobs_ and so return a _job id_. Using it's job id, a client can query for the status of the job and, when it has completed, the result of the job.
+Requests sent to Piazza can be either _short_ or _long_. Short requests, like most `GET` and `DELETE` operations, return their results immediately. Long operations, like a `POST` to load a file, execute as a jobs and therefore, return a Job Id. Using that Job ID, a client can query for the status of the job and, when completed, the result of the job.
 
-Internal to Piazza, hidden from users, are a set of web services that implement and support the operations that Piazza provides. These services include operations like storing metadata, serving up feature data via WFS, and tracking the status of executions of user services. Also internal to the system are a number of "infrastructure" components like Elasticsearch, GeoServer, PostGIS, and Kafka. Information about Piazza's internals can be found in the Piazza Developers Guide.
+Internal to Piazza, hidden from users, are a set of web services that implement and support the operations that Piazza provides. These services include operations like storing metadata, serving up feature data via WFS, and tracking the status of executions of user services. Also internal to the system are a number of "infrastructure" components like Elasticsearch, GeoServer, PostGIS, and Kafka. Information about Piazza's internals can be found in the Piazza Developer’s Guide.
 
 ## An Example Application
 
-Let's consider an example of an application that might use Piazza: shoreline boundary extraction. Detailed, current information about shoreline locations -- expressed as vector (linear) features -- is an important resource for everything from monitoring coastal erosion to planning amphibious landings. An automated system for updating shoreline boundaries would be very useful.
+Let's consider an example of an application that might use Piazza - shoreline boundary extraction. Detailed, current information about shoreline locations, expressed as vector (linear) features, is an important resource for everything from monitoring coastal erosion to planning amphibious landings. An automated system for updating shoreline boundaries would be very useful.
 
-Therefore, let us imagine that you have been asked to build an application that runs 24/7 to continually update a database of shoreline vectors. You have been given access to a repository of global satellite imagery, and this repository is continually being updated with new data. You have also been given three different algorithms that compute shoreline vectors from such imagery; none of the three works perfectly, and some are better than others for detecting certain types of shoreline, e.g estuaries. Because none of them work perfectly all the time, the algorithms return a "confidence" metric for each computed shoreline vector; if the confidence is "low", the imagery and the candidate vector must be reviewed manually.
+Therefore, let us imagine that you have been asked to build an application that runs 24/7 to continually update a database of shoreline vectors. You have been given access to a repository of global satellite imagery and this repository is continually being updated with new data. You have also been given three different algorithms that compute shoreline vectors from such imagery; none of the three work perfectly and some are better than others for detecting certain types of shoreline, e.g estuaries. Because none of them work flawlessly all the time, the algorithms return a "confidence" metric for each computed shoreline vector; if the confidence is "low," the imagery and the candidate vector must be reviewed manually.
 
 Your application will need to perform the following operations:
 
@@ -46,10 +46,10 @@ Your application will need to perform the following operations:
 
 Piazza can be used to help implement all of these operations.
 
-. A service must monitor the imagery repository for new data; when new data appears, it must be loaded into Piazza.
+. A service must monitor the imagery repository for new data and when new data appears, it must be loaded into Piazza.
 . When an image is loaded into Piazza, the image's metadata is extracted and stored within Piazza.
-. A workflow-like "rule" must be constructed: whenever _(a new image is loaded and its bounding box intersects this polygon and its cloud cover is below a threshold)_, then _(invoke each of the algorithms, ideally in parallel, using the loaded image's resource id as the input)_.
+. A workflow-like "rule" must be constructed. Example: if __(a new image is loaded and its bounding box intersects this polygon and its cloud cover is below a threshold), then _(invoke each of the algorithms, ideally in parallel, using the loaded image's resource id as the input)_.
 . Again using a workflow rule: when _(all three algorithms have completed)_, then
 .. If _(the confidence is low)_, then _(issue a manual-check-needed alert, whose payload consists of the data resource id, the candidate vector, and the confidence value)_.
 .. If _(the confidence is high)_, then _(perform a database insert)_.
-. Within some client application, periodically poll Piazza for manual-check-needed alerts: when found, present the data to the user for evaluation.
+. Within some client application, periodically poll Piazza for manual-check-needed alerts and when found, present the data to the user for evaluation.
